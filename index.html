@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>FE - Interview Project</title>
+		<script src="https://cdn.tailwindcss.com"></script>
+		<script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>
+		<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+		<style>
+			[x-cloak] {
+				display: none;
+			}
+		</style>
+	</head>
+	<body>
+		<!-- data -->
+		<div 
+		x-data="{
+		todos: $persist([]),
+		taskTitle: '',
+		taskDescription: '',
+		id: 0,
+		all: true,
+		active: false,
+		complete: false,
+		editing: false,
+		}"
+		>
+			<!-- background -->
+			<div class="bg-auto min-h-screen  bg-gradient-to-t from-lime-500  to-blue-500 px-8 pb-10">
+				<header class="py-5 container mx-auto"><span class="text-white text-3xl font-bold">Personal Task Manager</span> </header>
+				<!-- task submit container -->
+				<div class="bg-white container mx-auto rounded-lg p-5 pb-2">
+					<form x-on:submit.prevent>
+						<div class="mb-3">
+							<label for="Task" class="block mb-2 text-sm font-medium">Task Title:</label>
+							<input type="text" id="input" placeholder="Task Title"
+							x-model="taskTitle"
+							class="bg-transparent border text-gray-900 text-sm rounded-lg focus:outline-blue-500 block w-full p-2">
+						</div>
+						<div class="mb-3">
+							<label for="task-description" class="block mb-2 text-sm font-medium">Task Description:</label>
+							<textarea rows="3" id="" placeholder="Enter Task Description"
+							x-model="taskDescription"
+							class="bg-transparent border text-sm rounded-lg focus:outline-blue-500 block w-full p-2"></textarea>
+						</div>
+
+						<!-- add task -->
+						<button
+							x-on:click="if(taskTitle.trim().length > 0)
+							 todos.push({
+								name: taskTitle,
+								description: taskDescription,
+								complete: false,
+								id,
+								editing: false,});
+								id++;
+								taskTitle = '';
+								taskDescription = '';
+								console.log(todos)"
+							class="bg-sky-500 hover:bg-sky-600 text-white font-bold py-1.5 px-3 rounded-lg">
+							Add Task
+						</button>
+					</form>
+				</div>
+
+				<!-- Tabs -->
+				<div class="bg-white container rounded-lg p-3 mt-6 mx-auto">
+					<button
+						x-on:click="
+						all = true;
+						active = false;
+						complete = false;"
+						x-bind:class="{'text-white bg-sky-500' : all}"
+						class="text-sky-500  font-semibold py-1.5 px-3 mx-1 rounded-lg border border-sky-400">
+						All
+					</button>
+					<button
+						x-on:click="
+						active = true;
+						all = false;
+						complete = false;"
+						x-bind:class="{'text-white bg-sky-500' : active}"
+						class="text-sky-500 font-semibold py-1.5 px-3 mx-1 rounded-lg border border-sky-400">
+						Active
+					</button>
+					<button
+					x-on:click="
+						complete = true;
+						active = false;
+						all = false;"
+						x-bind:class="{'text-white bg-sky-500' : complete}"
+						class="text-sky-400 font-semibold py-1.5 px-3 mx-1 rounded-lg border border-sky-400">
+						Completed
+					</button>
+
+					<div class="py-1.5 mb-3 pb-1">
+						<button
+							x-show="todos.length > 0"
+							x-cloak
+							x-transition.duration.500ms
+							x-on:click="todos = [];"
+							class="float-right text-red-500 font-semibold px-1 mb-2">
+							Clear All
+						</button>
+					</div>
+					<div>
+						<!-- template -->
+						<template x-for="todo in todos">
+								<div 
+									x-show="all || complete == todo.complete;"
+									x-transition.duration.500ms
+									class="container h-auto w-90 rounded-lg bg-gray-200 my-6 mr-2 py-1.5 px-1 overflow-hidden">
+								<!-- checkbox -->
+								<header class="h-4">
+									<input 
+										x-show="!todo.editing"
+										x-transition.duration.500ms
+										x-on:click="todo.complete = ! todo.complete;
+										console.log(todos);"
+										x-model="todo.complete"
+										class="mx-2" type="checkbox">
+
+									<!-- remove task -->
+									<button 
+										x-show="!todo.editing"
+										x-transition.duration.300ms
+										x-on:click="todos = todos.filter(current => current != todo)"
+										class="float-right mx-2 my-2 px-1.5 py-1 text-red-500 font-bold text-base">x</button> 
+
+									<!-- edit button -->
+									<input type="button"
+										x-on:click="
+										todo.editing = ! todo.editing;" 
+										x-if="if(todo.editing == false){
+											$el.value = 'Edit';
+										}
+										else{
+											$el.value = 'Cancel';
+										};"
+										value="Edit"
+										class="float-right mx-2 my-2 px-1 py-1 font-semibold hover:cursor-pointer">
+									
+									</header>
+									<!-- todo name -->
+									<div class="ml-3">
+										<span
+										x-text="todo.name"
+										x-bind:class="{'line-through text-slate-500': todo.complete}"
+										class="font-bold text-xl break-words"></span>
+										
+										<!-- todo name edit -->
+										<input 
+											id="editName"
+											type="text"
+											x-show="todo.editing"
+											x-transition.duration.500ms
+											x-on:keyup.enter="if($el.value.trim().length > 0){
+											todo.name = $el.value;
+											$el.value = '';};"
+											class="rounded-lg bg-gray-300 outline-2 mx-3 px-3"
+											placeholder="Edit Task Name">
+
+										<br>
+										<!-- todo description -->
+										<span 
+											x-text="todo.description"
+											x-bind:class="{'line-through text-slate-500': todo.complete}"
+											class="break-words">
+										</span>
+
+										<!-- edit todo description -->
+										<input 
+											id="editDescription"
+											type="text"
+											value=""
+											x-show="todo.editing"
+											x-transition.duration.500ms
+											x-on:keyup.enter="
+												if($el.value.trim().length > 0){
+												todo.description = $el.value
+												$el.value = ''};"
+											class="rounded-lg bg-gray-300 outline-2 mx-3 my-1 px-3 "
+											placeholder="Edit Task Description">
+									</div>
+						</template>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
